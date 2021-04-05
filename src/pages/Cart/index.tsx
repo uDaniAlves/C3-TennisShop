@@ -21,27 +21,27 @@ const Cart = (): JSX.Element => {
   const { cart, removeProduct, updateProductAmount } = useCart();
 
   const cartFormatted = cart.map((product) => ({
-    product,
+    ...product,
     priceFormatted: formatPrice(product.price),
     subTotal: formatPrice(product.amount * product.price),
   }));
 
   const total = formatPrice(
     cart.reduce((sumTotal, product) => {
-      return sumTotal + product.price;
+      return sumTotal + product.price * product.amount;
     }, 0)
   );
 
   function handleProductIncrement(product: Product) {
-    updateProductAmount({ productId: product.id, amount: 1 });
+    updateProductAmount({ productId: product.id, amount: product.amount + 1 });
   }
 
   function handleProductDecrement(product: Product) {
-    // TODO
+    updateProductAmount({ productId: product.id, amount: product.amount - 1 });
   }
 
   function handleRemoveProduct(productId: number) {
-    // TODO
+    removeProduct(productId);
   }
 
   return (
@@ -58,12 +58,12 @@ const Cart = (): JSX.Element => {
         </thead>
         <tbody>
           {cartFormatted.map((product) => (
-            <tr data-testid="product" key={product.product.id}>
+            <tr data-testid="product" key={product.id}>
               <td>
-                <img src={product.product.image} alt={product.product.title} />
+                <img src={product.image} alt={product.title} />
               </td>
               <td>
-                <strong>{product.product.title}</strong>
+                <strong>{product.title}</strong>
                 <span>{product.priceFormatted}</span>
               </td>
               <td>
@@ -71,29 +71,34 @@ const Cart = (): JSX.Element => {
                   <button
                     type="button"
                     data-testid="decrement-product"
-                    // disabled={product.amount <= 1}
-                    // onClick={() => handleProductDecrement()}
+                    disabled={product.amount <= 1}
+                    onClick={() => handleProductDecrement(product)}
                   >
                     <MdRemoveCircleOutline size={20} />
                   </button>
-                  <input type="text" data-testid="product-amount" readOnly />
+                  <input
+                    type="text"
+                    data-testid="product-amount"
+                    readOnly
+                    value={product.amount}
+                  />
                   <button
                     type="button"
                     data-testid="increment-product"
-                    // onClick={() => handleProductIncrement()}
+                    onClick={() => handleProductIncrement(product)}
                   >
                     <MdAddCircleOutline size={20} />
                   </button>
                 </div>
               </td>
               <td>
-                <strong>{product.priceFormatted}</strong>
+                <strong>{product.subTotal}</strong>
               </td>
               <td>
                 <button
                   type="button"
                   data-testid="remove-product"
-                  // onClick={() => handleRemoveProduct(product.id)}
+                  onClick={() => handleRemoveProduct(product.id)}
                 >
                   <MdDelete size={20} />
                 </button>
